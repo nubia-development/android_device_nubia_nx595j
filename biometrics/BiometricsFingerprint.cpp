@@ -244,8 +244,9 @@ fingerprint_device_t* getDeviceForVendor(const char *class_name)
     }
 
     if (kVersion != device->version) {
+        // enforce version on new devices because of HIDL@2.1 translation layer
         ALOGE("Wrong fingerprint version: expected %d, got %d", kVersion, device->version);
-        return nullptr;
+        //return nullptr;
     }
 
     fingerprint_device_t *fp_device =
