@@ -1,4 +1,4 @@
-service fps_hal /vendor/bin/hw/android.hardware.biometrics.fingerprint@2.1-service.nx595j
+service vendor.fps_hal /vendor/bin/hw/android.hardware.biometrics.fingerprint@2.1-service.nx595j
     class late_start
     user system
     group system input
