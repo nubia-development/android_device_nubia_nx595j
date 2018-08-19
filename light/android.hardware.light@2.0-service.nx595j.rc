@@ -12,7 +12,7 @@ on init
     chmod 660 /sys/class/leds/nubia_led/outn
     chmod 660 /sys/class/leds/nubia_led/debug
 
-service light-hal-2-0 /vendor/bin/hw/android.hardware.light@2.0-service.nx595j
+service vendor.light-hal-2-0 /vendor/bin/hw/android.hardware.light@2.0-service.nx595j
     class hal
     user system
     group system
