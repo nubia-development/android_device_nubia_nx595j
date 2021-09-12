@@ -95,6 +95,9 @@ PRODUCT_PACKAGES += \
     libgui_vendor \
     libstdc++.vendor
 
+PRODUCT_PACKAGES += \
+    libpowermanager.vendor
+
 # Wifi
 PRODUCT_PACKAGES += \
     WifiOverlay_nx595j
