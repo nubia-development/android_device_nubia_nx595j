@@ -259,13 +259,6 @@ fingerprint_device_t* getFingerprintDevice()
 {
     fingerprint_device_t *fp_device;
 
-    fp_device = getDeviceForVendor("fpc");
-    if (fp_device == nullptr) {
-        ALOGE("Failed to load fpc fingerprint module");
-    } else {
-        return fp_device;
-    }
-
     fp_device = getDeviceForVendor("goodix");
     if (fp_device == nullptr) {
         ALOGE("Failed to load goodix fingerprint module");
