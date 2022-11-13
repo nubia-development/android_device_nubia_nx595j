@@ -51,6 +51,10 @@ PRODUCT_PACKAGES += \
     android.hardware.biometrics.fingerprint@2.1-service.nx595j \
     android.hardware.biometrics.fingerprint@2.1.vendor
 
+PRODUCT_PACKAGES += \
+    init.nubia.goodix.sh \
+    init.nubia.goodix.rc
+
 # Keylayout
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/keylayout/nubia_synaptics_dsx.kl:$(TARGET_COPY_OUT_VENDOR)/usr/keylayout/nubia_synaptics_dsx.kl

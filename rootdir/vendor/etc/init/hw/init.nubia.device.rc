@@ -27,6 +27,7 @@
 #
 
 import /vendor/etc/init/hw/init.nubia.touch.lcd.rc
+import /vendor/etc/init/hw/init.nubia.goodix.rc
 
 on post-fs-data
     chown system system /dev/ttyMSM1
