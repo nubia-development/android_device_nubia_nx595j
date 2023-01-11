@@ -13,9 +13,9 @@
 // limitations under the License.
 
 cc_binary {
-    name: "vendor.lineage.touch@1.0-service.nx563j",
-    vintf_fragments: ["vendor.lineage.touch@1.0-service.nx563j.xml"],
-    init_rc: ["vendor.lineage.touch@1.0-service.nx563j.rc"],
+    name: "vendor.lineage.touch@1.0-service.nx595j",
+    vintf_fragments: ["vendor.lineage.touch@1.0-service.nx595j.xml"],
+    init_rc: ["vendor.lineage.touch@1.0-service.nx595j.rc"],
     defaults: ["hidl_defaults"],
     relative_install_path: "hw",
     vendor: true,

@@ -61,11 +61,11 @@ PRODUCT_COPY_FILES += \
 
 # Lights
 PRODUCT_PACKAGES += \
-    android.hardware.light@2.0-service.nx563j
+    android.hardware.light@2.0-service.nx595j
 
 # Lineage hardware
 PRODUCT_PACKAGES += \
-    vendor.lineage.touch@1.0-service.nx563j
+    vendor.lineage.touch@1.0-service.nx595j
 
 # NFC
 PRODUCT_PACKAGES += \
@@ -110,7 +110,7 @@ PRODUCT_PACKAGES += \
 
 # Wifi
 PRODUCT_PACKAGES += \
-    WifiOverlay_nx563j
+    WifiOverlay_nx595j
 
 # Get non-open-source specific aspects
-$(call inherit-product, vendor/nubia/nx563j/nx563j-vendor.mk)
+$(call inherit-product, vendor/nubia/nx595j/nx595j-vendor.mk)
