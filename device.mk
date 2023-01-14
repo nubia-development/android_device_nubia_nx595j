@@ -42,15 +42,6 @@ PRODUCT_PACKAGES += \
     libfui \
     libui_shim.vendor:32
 
-# Consumerir
-PRODUCT_PACKAGES += \
-    android.hardware.ir@1.0-impl \
-    android.hardware.ir@1.0-service
-
-# Consumerir
-PRODUCT_COPY_FILES += \
-    frameworks/native/data/etc/android.hardware.consumerir.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.consumerir.xml
-
 # Display configs
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/display/qdcm_calib_data_jdi_nt35596s_1080x2040_mipi_video_panel.xml:$(TARGET_COPY_OUT_VENDOR)/etc/qdcm_calib_data_jdi_nt35596s_1080x2040_mipi_video_panel.xml
