@@ -53,7 +53,7 @@ PRODUCT_COPY_FILES += \
 
 # Display configs
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/display/qdcm_calib_data_jdi_r63452_1080p_5p5_mipi_cmd_panel.xml:$(TARGET_COPY_OUT_VENDOR)/etc/qdcm_calib_data_jdi_r63452_1080p_5p5_mipi_cmd_panel.xml
+    $(LOCAL_PATH)/display/qdcm_calib_data_jdi_nt35596s_1080x2040_mipi_video_panel.xml:$(TARGET_COPY_OUT_VENDOR)/etc/qdcm_calib_data_jdi_nt35596s_1080x2040_mipi_video_panel.xml
 
 # Keylayout
 PRODUCT_COPY_FILES += \
