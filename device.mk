@@ -54,10 +54,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.light@2.0-service.nx595j
 
-# Lineage hardware
-PRODUCT_PACKAGES += \
-    vendor.lineage.touch@1.0-service.nx595j
-
 # NFC
 PRODUCT_PACKAGES += \
     libnfc \
