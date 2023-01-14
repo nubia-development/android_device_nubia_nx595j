@@ -87,6 +87,11 @@ PRODUCT_PACKAGES += \
     init.nubia.device.rc \
     init.nubia.touch.lcd.rc
 
+# Vibrator
+PRODUCT_PACKAGES += \
+    android.hardware.vibrator@1.0-impl:64 \
+    android.hardware.vibrator@1.0-service
+
 # VNDK
 # Update this list with what each blob is actually for
 # libgui_vendor: libnubia_effect.so, camera.msm8998.so
