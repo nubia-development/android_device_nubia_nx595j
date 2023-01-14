@@ -594,3 +594,7 @@ vendor/firmware/Generic_unsigned_822_2.ncd
 vendor/firmware/Generic_unsigned_918_1.ncd
 vendor/firmware/Generic_unsigned_SY.ncd
 vendor/firmware/Generic_unsigned_fix_p2p_stuck.ncd
+
+# VNDK -- android 12 build
+vendor/lib/libbinder.so|eb21425bae0984b769594de3a29d6d3b74b499df
+vendor/lib64/libbinder.so|08456bd4ab21deffdd762c45d790bbf1cb96791a
