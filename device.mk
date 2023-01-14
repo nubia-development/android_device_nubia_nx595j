@@ -46,6 +46,11 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/display/qdcm_calib_data_jdi_nt35596s_1080x2040_mipi_video_panel.xml:$(TARGET_COPY_OUT_VENDOR)/etc/qdcm_calib_data_jdi_nt35596s_1080x2040_mipi_video_panel.xml
 
+# Fingerprint
+PRODUCT_PACKAGES += \
+    android.hardware.biometrics.fingerprint@2.1-service.nx595j \
+    android.hardware.biometrics.fingerprint@2.1.vendor
+
 # Keylayout
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/keylayout/nubia_synaptics_dsx.kl:$(TARGET_COPY_OUT_VENDOR)/usr/keylayout/nubia_synaptics_dsx.kl
