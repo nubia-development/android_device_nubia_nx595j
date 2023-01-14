@@ -22,36 +22,46 @@
 
 #include <fstream>
 
-#define LEDS            "/sys/class/leds/"
+#define LCD_LED         "/sys/class/leds/lcd-backlight/brightness"
 
-#define BUTTON1_LED     LEDS "button-backlight1/"
-#define BUTTON_LED      LEDS "button-backlight/"
-#define LCD_LED         LEDS "lcd-backlight/"
-#define WHITE_LED       LEDS "white/"
+#define NUBIA_LED_MODE    "/sys/class/leds/nubia_led/blink_mode"
+#define NUBIA_LED_COLOR        "/sys/class/leds/nubia_led/outn"
+#define NUBIA_GRADE    "/sys/class/leds/nubia_led/grade_parameter"
+#define NUBIA_FADE     "/sys/class/leds/nubia_led/fade_parameter"
 
-#define BLINK           "blink"
-#define BRIGHTNESS      "brightness"
-#define DUTY_PCTS       "duty_pcts"
-#define PAUSE_HI        "pause_hi"
-#define PAUSE_LO        "pause_lo"
-#define RAMP_STEP_MS    "ramp_step_ms"
-#define START_IDX       "start_idx"
+#define BATTERY_STATUS_FILE       "/sys/class/power_supply/battery/status"
+#define BATTERY_CAPACITY          "/sys/class/power_supply/battery/capacity"
+
+#define BATTERY_STATUS_DISCHARGING  "Discharging"
+#define BATTERY_STATUS_NOT_CHARGING "Not charging"
+#define BATTERY_STATUS_CHARGING     "Charging"
+
+#define BLINK_MODE_ON    3
+#define BLINK_MODE_CONST 1
+#define BLINK_MODE_OFF   0
+
+#define NUBIA_LED_DISABLE 16
+#define NUBIA_LED_RED     48
+#define NUBIA_LED_GREEN   64
+
+#define BREATH_SOURCE_NOTIFICATION	0x01
+#define BREATH_SOURCE_BATTERY		0x02
+#define BREATH_SOURCE_BUTTONS		0x04
+#define BREATH_SOURCE_ATTENTION		0x08
+#define BREATH_SOURCE_NONE			0x00
 
 #define MAX_LED_BRIGHTNESS    255
 #define MAX_LCD_BRIGHTNESS    4095
 
-/*
- * 8 duty percent steps.
- */
-#define RAMP_STEPS 8
-/*
- * Each step will stay on for 50ms by default.
- */
-#define RAMP_STEP_DURATION 50
-/*
- * Each value represents a duty percent (0 - 100) for the led pwm.
- */
-static int32_t BRIGHTNESS_RAMP[RAMP_STEPS] = {0, 12, 25, 37, 50, 72, 85, 100};
+static int32_t active_status = 0;
+
+enum battery_status {
+    BATTERY_UNKNOWN = 0,
+    BATTERY_LOW,
+    BATTERY_FREE,
+    BATTERY_CHARGING,
+    BATTERY_FULL,
+};
 
 namespace {
 /*
@@ -66,6 +76,34 @@ static void set(std::string path, std::string value) {
     }
 
     file << value;
+}
+
+static int get(std::string path) {
+    std::ifstream file(path);
+    int value;
+
+    if (!file.is_open()) {
+        ALOGW("failed to read from %s", path.c_str());
+        return 0;
+    }
+
+    file >> value;
+    return value;
+}
+
+static int readStr(std::string path, char *buffer, size_t size)
+{
+
+    std::ifstream file(path);
+
+    if (!file.is_open()) {
+        ALOGW("failed to read %s", path.c_str());
+        return -1;
+    }
+
+    file.read(buffer, size);
+    file.close();
+    return 1;
 }
 
 static void set(std::string path, int value) {
@@ -95,6 +133,40 @@ static uint32_t getBrightness(const LightState& state) {
     return (77 * red + 150 * green + 29 * blue) >> 8;
 }
 
+int getBatteryStatus()
+{
+    int err;
+
+    char status_str[16];
+    int capacity = 0;
+
+    err = readStr(BATTERY_STATUS_FILE, status_str, sizeof(status_str));
+    if (err <= 0) {
+        ALOGI("failed to read battery status: %d", err);
+        return BATTERY_UNKNOWN;
+    }
+
+    //ALOGI("battery status: %d, %s", err, status_str);
+
+    capacity = get(BATTERY_CAPACITY);
+
+    //ALOGI("battery capacity: %d", capacity);
+
+    if (0 == strncmp(status_str, BATTERY_STATUS_CHARGING, 8)) {
+        if (capacity < 90) {
+            return BATTERY_CHARGING;
+        } else {
+            return BATTERY_FULL;
+        }
+    } else {
+        if (capacity < 10) {
+            return BATTERY_LOW;
+        } else {
+            return BATTERY_FREE;
+        }
+    }
+}
+
 static inline uint32_t scaleBrightness(uint32_t brightness, uint32_t maxBrightness) {
     return brightness * maxBrightness / 0xFF;
 }
@@ -105,76 +177,122 @@ static inline uint32_t getScaledBrightness(const LightState& state, uint32_t max
 
 static void handleBacklight(const LightState& state) {
     uint32_t brightness = getScaledBrightness(state, MAX_LCD_BRIGHTNESS);
-    set(LCD_LED BRIGHTNESS, brightness);
+    set(LCD_LED, brightness);
 }
 
-static void handleButtons(const LightState& state) {
+static uint32_t setBreathLightLocked(uint32_t event_source, const LightState& state){
     uint32_t brightness = getScaledBrightness(state, MAX_LED_BRIGHTNESS);
-    set(BUTTON_LED BRIGHTNESS, brightness);
-    set(BUTTON1_LED BRIGHTNESS, brightness);
-}
 
-/*
- * Scale each value of the brightness ramp according to the
- * brightness of the color.
- */
-static std::string getScaledRamp(uint32_t brightness) {
-    std::string ramp, pad;
-
-    for (auto const& step : BRIGHTNESS_RAMP) {
-        ramp += pad + std::to_string(step * brightness / 0xFF);
-        pad = ",";
+    if (brightness > 0) {
+        active_status |= event_source;
+    } else {
+        active_status &= ~event_source;
     }
 
-    return ramp;
-}
+    if(active_status == 0) { //nothing, close all
+        // disable green led
+        set(NUBIA_LED_COLOR, NUBIA_LED_GREEN);
+        set(NUBIA_LED_MODE, BLINK_MODE_OFF);
+        // disable red led
+        set(NUBIA_LED_COLOR, NUBIA_LED_RED);
+        set(NUBIA_LED_MODE, BLINK_MODE_OFF);
+        // set disable led
+        set(NUBIA_LED_COLOR, NUBIA_LED_DISABLE);
+        set(NUBIA_LED_MODE, BLINK_MODE_OFF);
+        set(NUBIA_FADE, "0 0 0");
+        set(NUBIA_GRADE, "100 255");
+        return 0;
+    }
 
-static void handleNotification(const LightState& state) {
-    uint32_t whiteBrightness = getScaledBrightness(state, MAX_LED_BRIGHTNESS);
-
-    /* Disable blinking */
-    set(WHITE_LED BLINK, 0);
-
-    if (state.flashMode == Flash::TIMED) {
-        /*
-         * If the flashOnMs duration is not long enough to fit ramping up
-         * and down at the default step duration, step duration is modified
-         * to fit.
-         */
-        int32_t stepDuration = RAMP_STEP_DURATION;
-        int32_t pauseHi = state.flashOnMs - (stepDuration * RAMP_STEPS * 2);
-        int32_t pauseLo = state.flashOffMs;
-
-        if (pauseHi < 0) {
-            stepDuration = state.flashOnMs / (RAMP_STEPS * 2);
-            pauseHi = 0;
+    if(active_status & BREATH_SOURCE_BATTERY) { //battery status
+	    int battery_state = getBatteryStatus();
+	    if(battery_state == BATTERY_CHARGING || battery_state == BATTERY_LOW){
+            set(NUBIA_LED_COLOR, NUBIA_LED_RED);
+            set(NUBIA_FADE, "0 0 0");
+            set(NUBIA_GRADE, "100 255");
+            set(NUBIA_LED_MODE, BLINK_MODE_CONST);
+        }else if (battery_state == BATTERY_FULL){
+            set(NUBIA_LED_COLOR, NUBIA_LED_GREEN);
+            set(NUBIA_FADE, "0 0 0");
+            set(NUBIA_GRADE, "100 255");
+            set(NUBIA_LED_MODE, BLINK_MODE_CONST);
         }
 
-        /* White */
-        set(WHITE_LED START_IDX, 0 * RAMP_STEPS);
-        set(WHITE_LED DUTY_PCTS, getScaledRamp(whiteBrightness));
-        set(WHITE_LED PAUSE_LO, pauseLo);
-        set(WHITE_LED PAUSE_HI, pauseHi);
-        set(WHITE_LED RAMP_STEP_MS, stepDuration);
-
-        /* Enable blinking */
-        set(WHITE_LED BLINK, 1);
-    } else {
-        set(WHITE_LED BRIGHTNESS, whiteBrightness);
+        return 0;
     }
+
+    if( (active_status & BREATH_SOURCE_NOTIFICATION ) || (active_status & BREATH_SOURCE_ATTENTION)) { //notification, set home breath
+        int32_t onMS = state.flashOnMs;
+        int32_t offMS = state.flashOffMs;
+        switch(onMS){
+        case 5000:
+            onMS = 5;
+            break;
+        case 2000:
+            onMS = 4;
+            break;
+        case 1000:
+            onMS = 3;
+            break;
+        case 500:
+            onMS = 2;
+            break;
+        case 250:
+            onMS = 1;
+            break;
+        default:
+            onMS = 1;
+        }
+
+        switch(offMS){
+        case 5000:
+            offMS = 5;
+            break;
+        case 2000:
+            offMS = 4;
+            break;
+        case 1000:
+            offMS = 3;
+            break;
+        case 500:
+            offMS = 2;
+            break;
+        case 250:
+            offMS = 1;
+            break;
+        case 1:
+            offMS = 0;
+            break;
+        default:
+            offMS = 0;
+        }
+        std::string fade_params = std::to_string(offMS) + " " + std::to_string(onMS) + " " + std::to_string(onMS);
+        set(NUBIA_LED_COLOR, NUBIA_LED_GREEN);
+        set(NUBIA_FADE, fade_params);
+        set(NUBIA_GRADE, "0 100");
+        set(NUBIA_LED_MODE, BLINK_MODE_ON);
+    }
+    return 0;
 }
 
 static inline bool isLit(const LightState& state) {
     return state.color & 0x00ffffff;
 }
 
+static void handleNotification(const LightState& state) {
+    setBreathLightLocked(BREATH_SOURCE_NOTIFICATION, state);
+}
+
+static void handleBattery(const LightState& state){
+    setBreathLightLocked(BREATH_SOURCE_BATTERY, state);
+}
+
 /* Keep sorted in the order of importance. */
 static std::vector<LightBackend> backends = {
     { Type::ATTENTION, handleNotification },
     { Type::NOTIFICATIONS, handleNotification },
-    { Type::BATTERY, handleNotification },
+    { Type::BATTERY, handleBattery },
     { Type::BACKLIGHT, handleBacklight },
-    { Type::BUTTONS, handleButtons },
 };
 
 }  // anonymous namespace
