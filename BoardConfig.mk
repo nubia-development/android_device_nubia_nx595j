@@ -37,7 +37,7 @@ BOARD_VENDORIMAGE_PARTITION_SIZE := 538836990 # above 513MB
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/recovery.fstab
 
 # Tap-to-wake
-TARGET_TAP_TO_WAKE_NODE := "/sys/class/input/input4/wake_gesture"
+TARGET_TAP_TO_WAKE_NODE := "/sys/class/touch/tpnode/synaptics/wake_gesture"
 
 # Display
 TARGET_SCREEN_DENSITY := 420
