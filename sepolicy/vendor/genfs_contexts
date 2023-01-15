@@ -1,0 +1,2 @@
+# Touchpanel
+genfscon sysfs /class/touch/tpnode/synaptics                    u:object_r:sysfs_touchscreen:s0

@@ -1,0 +1,2 @@
+# Touchscreen
+allow system_server sysfs_sectouch:file { rw_file_perms };
