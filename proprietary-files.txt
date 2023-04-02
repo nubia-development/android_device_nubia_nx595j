@@ -503,6 +503,12 @@ vendor/lib64/libgoodixfingerprintd_binder.so
 vendor/lib64/libgoodixhwfingerprint.so
 vendor/lib64/vendor.goodix.hardware.fingerprintextension@1.0.so
 
+# Gatekeeper
+vendor/lib64/hw/gatekeeper.msm8998.so
+
+# Keystore
+vendor/lib64/hw/keystore.msm8998.so
+
 # NFC firmware
 etc/libnfc-brcm-20797b00.conf:vendor/etc/libnfc-brcm-20797b00.conf
 vendor/firmware/BCM20797A1_001.002.015.2562.0011_Generic_I2C_NCD_Unsigned_configdata.ncd
